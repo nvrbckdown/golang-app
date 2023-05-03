@@ -9,10 +9,7 @@ WORKDIR $GOPATH/src/golang-app
 COPY . ./
 
 # installing depends and build
-RUN export CGO_ENABLED=0 && \
-    export GOOS=linux && \
-    make build && \
-    mv ./bin/golang-app /
+RUN go build -o golang-app
 
 FROM alpine
 COPY --from=builder golang-app .
