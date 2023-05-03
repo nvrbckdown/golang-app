@@ -1,19 +1,14 @@
 # workspace (GOPATH) configured at /go
 FROM golang:1.20.0 as builder
 
-#
-RUN mkdir -p $GOPATH/src/golang-app
-WORKDIR $GOPATH/src/golang-app
+WORKDIR /src
 
 # Copy the local package files to the container's workspace.
 COPY . ./
 
 # installing depends and build
-RUN export CGO_ENABLED=0 && \
-    export GOOS=linux && \
-    make build && \
-    mv ./bin/golang-app /
+RUN go build -o golang-app
 
 FROM alpine
-COPY --from=builder golang-app .
+COPY --from=builder /src/golang-app .
 ENTRYPOINT ["/golang-app"]
