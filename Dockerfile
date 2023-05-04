@@ -1,19 +1,23 @@
-FROM golang:1.17 as builder
+# syntax=docker/dockerfile:1
 
-#
-RUN mkdir -p $GOPATH/src/gitlab.udevs.io/ucode/golang-app 
-WORKDIR $GOPATH/src/gitlab.udevs.io/ucode/golang-app
+# Build the application from source
+FROM golang:1.19 AS build-stage
 
-# Copy the local package files to the container's workspace.
-COPY . ./
+WORKDIR /app
 
-# installing depends and build
-RUN export CGO_ENABLED=0 && \
-    export GOOS=linux && \
-    go mod vendor && \
-    make build && \
-    mv ./bin/golang-app /
+COPY go.mod go.sum ./
+RUN go mod download
 
-FROM alpine
-COPY --from=builder golang-app .
-ENTRYPOINT ["/golang-app"]
+COPY *.go ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
+# Deploy the application binary into a lean image
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
+
+WORKDIR /
+
+COPY --from=build-stage /docker-gs-ping /docker-gs-ping
+
+EXPOSE 8080
+
+ENTRYPOINT ["/docker-gs-ping"]
