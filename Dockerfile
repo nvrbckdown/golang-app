@@ -6,11 +6,10 @@ FROM golang:1.19 AS build-stage
 WORKDIR /app
 
 COPY go.mod ./
-RUN go mod download
 
 COPY *.go ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /golang-app
+RUN go build -o /golang-app
 
 
 WORKDIR /
