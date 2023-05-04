@@ -10,6 +10,7 @@ COPY . ./
 RUN go build -o /golang-app
 
 FROM alpine
+WORKDIR /
 COPY --from=build-stage /golang-app /golang-app
 
 EXPOSE 8080
