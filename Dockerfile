@@ -1,18 +1,19 @@
-# syntax=docker/dockerfile:1
+FROM golang:1.17 as builder
 
-# Build the application from source
-FROM golang:1.19 AS build-stage
+#
+RUN mkdir -p $GOPATH/src/gitlab.udevs.io/ucode/golang-app 
+WORKDIR $GOPATH/src/gitlab.udevs.io/ucode/golang-app
 
-WORKDIR /app
-
+# Copy the local package files to the container's workspace.
 COPY . ./
 
-RUN go build -o /golang-app
+# installing depends and build
+RUN export CGO_ENABLED=0 && \
+    export GOOS=linux && \
+    go mod vendor && \
+    make build && \
+    mv ./bin/golang-app /
 
 FROM alpine
-WORKDIR /
-COPY --from=build-stage /golang-app /golang-app
-
-EXPOSE 8080
-
+COPY --from=builder golang-app .
 ENTRYPOINT ["/golang-app"]
