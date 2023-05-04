@@ -51,6 +51,6 @@ func main() {
     http.HandleFunc("/", HomePage)
     http.HandleFunc("/k8s", Kubernetes)
  
-    fmt.Println("Server is listening...")
+    fmt.Println("Server is listening on port 8080")
     http.ListenAndServe(":8080", nil)
 }
