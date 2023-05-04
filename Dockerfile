@@ -1,14 +1,30 @@
-# workspace (GOPATH) configured at /go
-FROM golang:1.20.0 as builder
+# syntax=docker/dockerfile:1
 
-WORKDIR /src
+# Build the application from source
+FROM golang:1.19 AS build-stage
 
-# Copy the local package files to the container's workspace.
-COPY . ./
+WORKDIR /app
 
-# installing depends and build
-RUN go build -o golang-app
+COPY go.mod go.sum ./
+RUN go mod download
 
-FROM alpine
-COPY --from=builder /src/golang-app .
+COPY *.go ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /golang-app
+
+# Run the tests in the container
+FROM build-stage AS run-test-stage
+RUN go test -v ./...
+
+# Deploy the application binary into a lean image
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
+
+WORKDIR /
+
+COPY --from=build-stage /golang-app /golang-app
+
+EXPOSE 8080
+
+USER nonroot:nonroot
+
 ENTRYPOINT ["/golang-app"]

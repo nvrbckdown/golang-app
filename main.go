@@ -11,6 +11,7 @@ type Kuber struct{
 	Title string
     Pod string
     Node string
+    Namespace string
 }
 
 type Env struct{
@@ -35,10 +36,12 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 func Kubernetes(w http.ResponseWriter, r *http.Request) {
     pod := os.Getenv("MY_POD_NAME")
 	node := os.Getenv("MY_NODE_NAME")
+    ns := os.Getenv("MY_NAMESPACE")
     data := Kuber{
         Title: "k8s",
         Pod: pod,
         Node: node,
+        Namespace: ns,
     }
     tmpl, _ := template.ParseFiles("temp/kuber.html")
     tmpl.Execute(w, data)
