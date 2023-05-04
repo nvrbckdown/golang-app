@@ -5,15 +5,11 @@ FROM golang:1.19 AS build-stage
 
 WORKDIR /app
 
-COPY go.mod ./
-
-COPY *.go ./
+COPY . ./
 
 RUN go build -o /golang-app
 
-
-WORKDIR /
-
+FROM alpine
 COPY --from=build-stage /golang-app /golang-app
 
 EXPOSE 8080
