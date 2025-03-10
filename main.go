@@ -22,6 +22,10 @@ type Env struct {
 	ENV       string
 }
 
+type Ping struct {
+	Ping	string
+}
+
 func HomePage(w http.ResponseWriter, r *http.Request) {
 	http_port := os.Getenv("HTTP_PORT")
 	env := os.Getenv("ENV")
@@ -58,9 +62,24 @@ func Kubernetes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Ping(w http.ResponseWriter, r *http.Request) {
+	data := Ping{
+		Ping: "pong"
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
 func main() {
 	http.HandleFunc("/", HomePage)
 	http.HandleFunc("/k8s", Kubernetes)
+	http.HandleFunc("/ping", Ping)
 
 	fmt.Println("Server is listening on port 8080")
 	http.ListenAndServe(":8080", nil)
